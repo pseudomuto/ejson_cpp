@@ -1,0 +1,33 @@
+language: python
+compiler: gcc
+python: "3.7"
+
+os: linux
+dist: bionic
+
+env:
+  CONAN_USER_HOME=${HOME}
+
+cache:
+  pip: true
+  directories:
+    - ${HOME}/.cache
+    - ${HOME}/.conan
+
+before_install:
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-get -q update
+  - sudo apt-get -y install cmake gcc-9 g++-9
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
+
+install:
+  - pip install conan gcovr
+
+script:
+  - CODECOV=ON IWYU=OFF make cmake coverage
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -f cmake-build-debug/codecov.xml
+
+notifications:
+  email: false
